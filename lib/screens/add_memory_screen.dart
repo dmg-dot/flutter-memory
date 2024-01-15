@@ -1,5 +1,7 @@
 import 'dart:io';
 
+import 'package:anbu_memory/screens/view_memory_screen.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
@@ -14,14 +16,28 @@ class AddMemoryScreen extends StatefulWidget {
 class _AddMemoryScreenState extends State<AddMemoryScreen> {
   File? imageFile;
   final storage = FirebaseStorage.instance;
+  final now = DateTime.now().toIso8601String(); //현재 시간 저장
+  String title = '';
+  String content = '';
+  FirebaseFirestore _firestore = FirebaseFirestore.instance;
   Future<void> uploadImage() async {
-    print('전송 시작');
-    final now = DateTime.now(); //현재 시간 저장
+    print('사진 전송 시작');
     var ref = storage.ref().child('images/$now.jpg'); //참조 생성
     ref.putFile(imageFile!); //참조에 파일 저장
-    print('전송 끝!');
+    print('사진 전송 끝!');
   }
 
+  Future<void> uploadData() async {
+    print('데이터 전송 시작');
+    await _firestore
+        .collection("memory")
+        .doc()
+        .set({'title': title, 'content': content, 'image': now});
+    print('데이터 전송 끝!');
+  }
+
+  var _controllerTitle = TextEditingController(text: '');
+  var _controllerContent = TextEditingController();
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -35,18 +51,30 @@ class _AddMemoryScreenState extends State<AddMemoryScreen> {
           children: [
             Container(
               margin: const EdgeInsets.all(20),
-              child: const TextField(
-                style: TextStyle(fontSize: 16),
-                decoration: InputDecoration(
+              child: TextField(
+                controller: _controllerTitle,
+                onChanged: (text) {
+                  setState(() {
+                    title = text;
+                  });
+                },
+                style: const TextStyle(fontSize: 16),
+                decoration: const InputDecoration(
                     border: OutlineInputBorder(), hintText: '제목을 입력하세요.'),
               ),
             ),
             Container(
               margin: const EdgeInsets.all(20),
-              child: const TextField(
+              child: TextField(
+                controller: _controllerContent,
+                onChanged: (text) {
+                  setState(() {
+                    content = text;
+                  });
+                },
                 maxLines: 10,
-                style: TextStyle(fontSize: 16),
-                decoration: InputDecoration(
+                style: const TextStyle(fontSize: 16),
+                decoration: const InputDecoration(
                     border: OutlineInputBorder(), hintText: '내용을 입력하세요.'),
               ),
             ),
@@ -75,15 +103,16 @@ class _AddMemoryScreenState extends State<AddMemoryScreen> {
                 margin: const EdgeInsets.fromLTRB(20, 20, 20, 0),
                 child: (imageFile != null)
                     ? Image.file(imageFile!, fit: BoxFit.cover)
-                    : Text('$imageFile')),
+                    : const Text('첨부된 사진이 없어요!')),
             Container(
               margin: const EdgeInsets.fromLTRB(20, 50, 20, 0),
               height: 50,
               child: ElevatedButton(
                 onPressed: () => {
-                  if (imageFile != null)
+                  if (imageFile != null && title != '' && content != '')
                     {
                       uploadImage(),
+                      uploadData(),
                       showDialog(
                           context: context,
                           builder: (BuildContext context) {
@@ -98,7 +127,15 @@ class _AddMemoryScreenState extends State<AddMemoryScreen> {
                                     child: const Text('알겠어요'))
                               ],
                             );
-                          })
+                          }),
+                      _controllerTitle.clear(),
+                      _controllerContent.clear(),
+                      setState(() {
+                        title = '';
+                        content = '';
+                        imageFile = null;
+                      }),
+                      print(now)
                     }
                   else
                     {
@@ -116,7 +153,7 @@ class _AddMemoryScreenState extends State<AddMemoryScreen> {
                                     child: const Text('알겠어요'))
                               ],
                             );
-                          })
+                          }),
                     }
                 },
                 child: const Row(
