@@ -62,7 +62,7 @@ class _AddMemoryScreenState extends State<AddMemoryScreen> {
               ),
             ),
             Container(
-                margin: EdgeInsets.fromLTRB(20, 20, 20, 0),
+                margin: const EdgeInsets.fromLTRB(20, 20, 20, 0),
                 child: (imageFile != null)
                     ? Image.file(imageFile, fit: BoxFit.cover)
                     : Text('$imageFile')),
