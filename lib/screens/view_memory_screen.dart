@@ -3,6 +3,7 @@ import 'dart:ui';
 
 import 'package:anbu_memory/screens/detail_memory_screen.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/material.dart';
 
 class ViewMemoryScreen extends StatefulWidget {
@@ -24,7 +25,7 @@ class _ViewMemoryScreenState extends State<ViewMemoryScreen> {
             data.add(docSnapshot.data());
             dataCnt++;
           }
-          print(data);
+          print('data: $data');
         });
       },
       onError: (e) => debugPrint("Error completing: $e"),
@@ -71,7 +72,7 @@ class _ViewMemoryScreenState extends State<ViewMemoryScreen> {
   }
 }
 
-class MemoryComponent extends StatelessWidget {
+class MemoryComponent extends StatefulWidget {
   const MemoryComponent(
       {super.key,
       required this.title,
@@ -81,6 +82,11 @@ class MemoryComponent extends StatelessWidget {
   final String content;
   final String image;
 
+  @override
+  State<MemoryComponent> createState() => _MemoryComponentState();
+}
+
+class _MemoryComponentState extends State<MemoryComponent> {
   @override
   Widget build(BuildContext context) {
     double screenwidthFixed = MediaQuery.of(context).size.width / 375;
@@ -92,9 +98,9 @@ class MemoryComponent extends StatelessWidget {
           MaterialPageRoute(
             builder: (context) {
               return DetailMemoryScreen(
-                title: title,
-                content: content,
-                image: image,
+                title: widget.title,
+                content: widget.content,
+                image: widget.image,
               );
               // component 정보 받아서 반복문, detail도 정보 전송
             },
