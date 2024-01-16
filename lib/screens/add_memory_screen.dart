@@ -19,21 +19,17 @@ class _AddMemoryScreenState extends State<AddMemoryScreen> {
   final now = DateTime.now().toIso8601String(); //현재 시간 저장
   String title = '';
   String content = '';
-  FirebaseFirestore _firestore = FirebaseFirestore.instance;
+  final FirebaseFirestore _firestore = FirebaseFirestore.instance;
   Future<void> uploadImage() async {
-    print('사진 전송 시작');
     var ref = storage.ref().child('images/$now.jpg'); //참조 생성
     ref.putFile(imageFile!); //참조에 파일 저장
-    print('사진 전송 끝!');
   }
 
   Future<void> uploadData() async {
-    print('데이터 전송 시작');
     await _firestore
         .collection("memory")
         .doc()
         .set({'title': title, 'content': content, 'image': now});
-    print('데이터 전송 끝!');
   }
 
   var _controllerTitle = TextEditingController(text: '');

@@ -1,3 +1,4 @@
+import 'dart:math';
 import 'dart:ui';
 
 import 'package:anbu_memory/screens/detail_memory_screen.dart';
@@ -12,22 +13,30 @@ class ViewMemoryScreen extends StatefulWidget {
 }
 
 class _ViewMemoryScreenState extends State<ViewMemoryScreen> {
-  var data = [];
   num dataCnt = 0;
+  var data = [];
+  getData() async {
+    final db = FirebaseFirestore.instance;
+    db.collection("memory").get().then(
+      (querySnapshot) {
+        setState(() {
+          for (var docSnapshot in querySnapshot.docs) {
+            data.add(docSnapshot.data());
+            dataCnt++;
+          }
+          print(data);
+        });
+      },
+      onError: (e) => debugPrint("Error completing: $e"),
+    );
+  }
 
   @override
   initState() {
     super.initState();
-    final db = FirebaseFirestore.instance;
-    db.collection("memory").get().then(
-      (querySnapshot) {
-        for (var docSnapshot in querySnapshot.docs) {
-          data.add(docSnapshot.data());
-          dataCnt++;
-        }
-      },
-      onError: (e) => debugPrint("Error completing: $e"),
-    );
+
+    getData();
+    setState(() {});
   }
 
   @override
@@ -42,8 +51,18 @@ class _ViewMemoryScreenState extends State<ViewMemoryScreen> {
         child: Center(
           child: Column(
             children: [
+              TextButton(
+                  onPressed: () {
+                    if (dataCnt == 3) setState(() {});
+                  },
+                  child: const Text('새로고침')),
               Text('$dataCnt'),
-              for (num i = 0; i < dataCnt; i++) const MemoryComponent()
+              for (int i = 0; i < dataCnt; i++)
+                MemoryComponent(
+                  title: data[i]['title'],
+                  content: data[i]['content'],
+                  image: data[i]['image'],
+                ),
             ],
           ),
         ),
@@ -53,13 +72,17 @@ class _ViewMemoryScreenState extends State<ViewMemoryScreen> {
 }
 
 class MemoryComponent extends StatelessWidget {
-  const MemoryComponent({super.key});
+  const MemoryComponent(
+      {super.key,
+      required this.title,
+      required this.content,
+      required this.image});
+  final String title;
+  final String content;
+  final String image;
 
   @override
   Widget build(BuildContext context) {
-    String title = '제모목';
-    String content = '내요요요용';
-    String image = 'assets/images/anya.png';
     double screenwidthFixed = MediaQuery.of(context).size.width / 375;
     double screenheightFixed = MediaQuery.of(context).size.height / 812;
     return GestureDetector(
