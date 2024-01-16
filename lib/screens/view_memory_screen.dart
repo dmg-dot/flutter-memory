@@ -37,6 +37,9 @@ class MemoryComponent extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    String title = '제모목';
+    String content = '내요요요용';
+    String image = 'assets/images/anya.png';
     double screenwidthFixed = MediaQuery.of(context).size.width / 375;
     double screenheightFixed = MediaQuery.of(context).size.height / 812;
     return GestureDetector(
@@ -45,7 +48,12 @@ class MemoryComponent extends StatelessWidget {
           context,
           MaterialPageRoute(
             builder: (context) {
-              return DetailMemoryScreen();
+              return DetailMemoryScreen(
+                title: title,
+                content: content,
+                image: image,
+              );
+              // component 정보 받아서 반복문, detail도 정보 전송
             },
           ),
         );
