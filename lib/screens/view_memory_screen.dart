@@ -1,6 +1,7 @@
 import 'dart:ui';
 
 import 'package:anbu_memory/screens/detail_memory_screen.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 
 class ViewMemoryScreen extends StatefulWidget {
@@ -11,6 +12,24 @@ class ViewMemoryScreen extends StatefulWidget {
 }
 
 class _ViewMemoryScreenState extends State<ViewMemoryScreen> {
+  var data = [];
+  num dataCnt = 0;
+
+  @override
+  initState() {
+    super.initState();
+    final db = FirebaseFirestore.instance;
+    db.collection("memory").get().then(
+      (querySnapshot) {
+        for (var docSnapshot in querySnapshot.docs) {
+          data.add(docSnapshot.data());
+          dataCnt++;
+        }
+      },
+      onError: (e) => debugPrint("Error completing: $e"),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -19,11 +38,12 @@ class _ViewMemoryScreenState extends State<ViewMemoryScreen> {
           'View Memory',
         ),
       ),
-      body: const SingleChildScrollView(
+      body: SingleChildScrollView(
         child: Center(
           child: Column(
             children: [
-              MemoryComponent(),
+              Text('$dataCnt'),
+              for (num i = 0; i < dataCnt; i++) const MemoryComponent()
             ],
           ),
         ),
@@ -59,6 +79,7 @@ class MemoryComponent extends StatelessWidget {
         );
       },
       child: Container(
+          margin: const EdgeInsets.all(10),
           width: screenwidthFixed * 320,
           height: screenheightFixed * 100,
           decoration: BoxDecoration(borderRadius: BorderRadius.circular(30)),
