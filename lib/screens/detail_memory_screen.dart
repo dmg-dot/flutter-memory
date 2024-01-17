@@ -42,9 +42,9 @@ class _DetailMemoryScreenState extends State<DetailMemoryScreen> {
               ),
             ),
             Container(
-              margin: EdgeInsets.all(20),
-              child: Image.asset(
-                'assets/images/anya.png',
+              margin: const EdgeInsets.all(20),
+              child: Image.network(
+                widget.image,
                 fit: BoxFit.cover,
               ),
             ),

@@ -54,7 +54,7 @@ class _ViewMemoryScreenState extends State<ViewMemoryScreen> {
             children: [
               TextButton(
                   onPressed: () {
-                    if (dataCnt == 3) setState(() {});
+                    setState(() {});
                   },
                   child: const Text('새로고침')),
               Text('$dataCnt'),
@@ -87,10 +87,37 @@ class MemoryComponent extends StatefulWidget {
 }
 
 class _MemoryComponentState extends State<MemoryComponent> {
+  var imageUrl =
+      'https://www.hera.org.nz/wp-content/uploads/20150918_Notice_HERAreportR4-103Error_STRUC.jpg';
+  getImage() async {
+    print(widget.image);
+    final storageRef = FirebaseStorage.instance.ref();
+    try {
+      imageUrl =
+          await storageRef.child("images/${widget.image}.jpg").getDownloadURL();
+      print(imageUrl);
+      setState(() {});
+    } on FirebaseException catch (e) {
+      // Caught an exception from Firebase.
+      print("Failed with error '${e.code}': ${e.message}");
+    }
+  }
+
+  // 이미지 가져오기를 제일 먼저로 바꾸기!
+
+  @override
+  void initState() {
+    super.initState();
+    getImage();
+    setState(() {});
+    print('img::::: $imageUrl');
+  }
+
   @override
   Widget build(BuildContext context) {
     double screenwidthFixed = MediaQuery.of(context).size.width / 375;
     double screenheightFixed = MediaQuery.of(context).size.height / 812;
+
     return GestureDetector(
       onTap: () {
         Navigator.push(
@@ -100,7 +127,7 @@ class _MemoryComponentState extends State<MemoryComponent> {
               return DetailMemoryScreen(
                 title: widget.title,
                 content: widget.content,
-                image: widget.image,
+                image: imageUrl,
               );
               // component 정보 받아서 반복문, detail도 정보 전송
             },
@@ -121,8 +148,8 @@ class _MemoryComponentState extends State<MemoryComponent> {
                   borderRadius: BorderRadius.circular(30),
                   child: ImageFiltered(
                     imageFilter: ImageFilter.blur(sigmaX: 5, sigmaY: 5),
-                    child: Image.asset(
-                      'assets/images/anya.png',
+                    child: Image.network(
+                      imageUrl,
                       fit: BoxFit.cover,
                     ),
                   ),
@@ -142,10 +169,10 @@ class _MemoryComponentState extends State<MemoryComponent> {
                 padding: const EdgeInsets.fromLTRB(22, 18, 22, 18),
                 decoration:
                     BoxDecoration(borderRadius: BorderRadius.circular(30)),
-                child: const Center(
+                child: Center(
                   child: Text(
-                    '스파이 패밀리 극장판 대개봉 뽀로로 크롱 에디 루피 로디 스파이 패밀리 극장판 대개봉 뽀로로 크롱 에디 루피 로디 스파이 패밀리 극장판 대개봉 뽀로로 크롱 에디 루피 로디 스파이 패밀리 극장판 대개봉 뽀로로 크롱 에디 루피 로디',
-                    style: TextStyle(
+                    widget.title,
+                    style: const TextStyle(
                       fontSize: 16,
                       fontWeight: FontWeight.w900,
                       color: Colors.white,
